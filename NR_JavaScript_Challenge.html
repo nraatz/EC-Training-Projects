@@ -1,0 +1,274 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+  border: 2px solid black;
+  border-collapse: collapse;
+}
+th {
+  background-color: teal;
+  border: 2px solid black;
+  color: black;
+  align: center;
+  valign: middle;
+  height: 40px;
+  width: 90px;
+}
+td {
+  color: black;
+  border: 2px solid black;
+  text-align: center;
+  font-size: 300%;
+  height: 90px;
+  width: 90px;
+}
+
+</style>
+</head>
+<body onload="initialize()">
+
+<h1>Nathan Raatz JavaScript Challenge</h1>
+
+<p><b>Step 1:</b> Create a button to alert the current date.</p>
+
+<button id="displayDateButton">Display Current Date</button>
+
+<p><b>Step 2:</b> Display the data in the link, according to the entered date (add "&date=[ENTERED DATE YYYY-MM-DD]"). Display the Title, Description, Image, Image Name, and Name of Photographer.</p>
+
+<p>Please Input Date: <input type="date" id="dateField" value="2000-01-01"></input></p>
+
+<button type=button id="displayNasaBtn">Display NASA Data For Entered Date</button>
+
+<p id="nasaDisplayPort">Default Display Port</p>
+
+<p id="nasaTitle" display="none"></p>
+
+<p id="nasaDescription" display="none"></p>
+
+<img id="nasaImage" display="none"></img>
+
+<p id="nasaImageName" display="none"></p>
+<p><b>Step 3:</b> Create a calendar that displays all days of current month, displays current date differently, and grays out days outside of this month. Then expand to be able to change month.</p>
+
+<p id="displayPort">Default</p>
+
+<table style="width=100%">
+  <tr>
+    <th>Sunday</th>
+    <th>Monday</th>
+    <th>Tuesday</th>
+    <th>Wednesday</th>
+    <th>Thursday</th>
+    <th>Friday</th>
+    <th>Saturday</th>
+  </tr>
+  <tr>
+    <td id="CellR1C1"></td>
+    <td id="CellR1C2"></td>
+    <td id="CellR1C3"></td>
+    <td id="CellR1C4"></td>
+    <td id="CellR1C5"></td>
+    <td id="CellR1C6"></td>
+    <td id="CellR1C7"></td>
+  </tr>
+  <tr>
+    <td id="CellR2C1"></td>
+    <td id="CellR2C2"></td>
+    <td id="CellR2C3"></td>
+    <td id="CellR2C4"></td>
+    <td id="CellR2C5"></td>
+    <td id="CellR2C6"></td>
+    <td id="CellR2C7"></td>
+  </tr>
+  <tr>
+    <td id="CellR3C1"></td>
+    <td id="CellR3C2"></td>
+    <td id="CellR3C3"></td>
+    <td id="CellR3C4"></td>
+    <td id="CellR3C5"></td>
+    <td id="CellR3C6"></td>
+    <td id="CellR3C7"></td>
+  </tr>
+  <tr>
+    <td id="CellR4C1"></td>
+    <td id="CellR4C2"></td>
+    <td id="CellR4C3"></td>
+    <td id="CellR4C4"></td>
+    <td id="CellR4C5"></td>
+    <td id="CellR4C6"></td>
+    <td id="CellR4C7"></td>
+  </tr>
+  <tr>
+    <td id="CellR5C1"></td>
+    <td id="CellR5C2"></td>
+    <td id="CellR5C3"></td>
+    <td id="CellR5C4"></td>
+    <td id="CellR5C5"></td>
+    <td id="CellR5C6"></td>
+    <td id="CellR5C7"></td>
+  </tr>
+  <tr>
+    <td id="CellR6C1"></td>
+    <td id="CellR6C2"></td>
+    <td id="CellR6C3"></td>
+    <td id="CellR6C4"></td>
+    <td id="CellR6C5"></td>
+    <td id="CellR6C6"></td>
+    <td id="CellR6C7"></td>
+  </tr>
+</table>
+
+<script>
+
+function initialize()
+{
+  document.getElementById("displayDateButton").addEventListener("click", displayDate);
+  document.getElementById("displayNasaBtn").addEventListener("click", displayNASA);
+  displayCalendar();
+  console.log("About to set New Date in Initialize lol");
+  var currDt = new Date();
+  var currMonth = currDt.getMonth() + 1;
+  var currDay = currDt.getDate();
+  if (currMonth < 10)
+    {
+      currMonth = "0" + currMonth;
+    }
+  if (currDay < 10)
+    {
+      currDay = "0" + currDay;
+    }
+  var currStr = "" + currDt.getFullYear() + "-" + currMonth + "-" + currDay + ""
+  console.log(currStr);
+  document.getElementById("dateField").value = currStr;
+}
+
+function displayDate() 
+{
+  var d = new Date();
+  window.alert("Current Date: " + (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear());
+}
+
+function displayNASA()
+{
+  var d = document.getElementById("dateField").value;
+  var nasaData;
+  var requestURL = 'https://api.nasa.gov/planetary/apod?api_key=jT9a9djmlXvr6QGYLXet52uTP4ycNUGYnqdQeCA7&date=' + d;
+  
+  var request = new XMLHttpRequest();
+  request.open('GET', requestURL);
+  request.responseType = 'json';
+  request.send();
+
+  request.onload = function() {
+    nasaData = request.response;
+    console.log(nasaData);
+    document.getElementById("nasaDisplayPort").innerHTML = nasaData.date;
+    
+    document.getElementById("nasaDisplayPort").innerHTML = "NASA Data for " + d;
+    document.getElementById("nasaTitle").innerHTML = "Title: " + nasaData.title;
+    document.getElementById("nasaDescription").innerHTML = "Description: " + nasaData.explanation;
+    document.getElementById("nasaImage").src = nasaData.url;
+    
+    var wholeurl = nasaData.url;
+    var title = wholeurl.slice(wholeurl.lastIndexOf("/") + 1, wholeurl.lastIndexOf("."));
+    
+    document.getElementById("nasaImageName").innerHTML = "Image Name: " + title;
+  }
+}
+
+function displayCalendar()
+{
+  console.log("About to create the Calendar!");
+  document.getElementById("displayPort").innerHTML = "About to create current date";
+  var currentDate = new Date();
+  document.getElementById("displayPort").innerHTML = "Month " + (currentDate.getMonth() + 1);
+  var currYear = currentDate.getFullYear();
+  var currMonth = currentDate.getMonth() + 1;
+  var currDate = currentDate.getDate();
+  var firstDateOfMonth = new Date(currYear, currMonth - 1, 1);
+  var firstDayOfWeek = firstDateOfMonth.getDay() + 1; //(since it's a 0-6 return)
+  console.log("firstDateOfMonth: " + firstDateOfMonth.getDate());
+  var tempDate = firstDateOfMonth.getDate() + 1;
+  document.getElementById("CellR1C" + firstDayOfWeek).innerHTML = "1";
+   
+  if (currDate == 1)
+  {
+    document.getElementById("CellR1C" + firstDayOfWeek).style.background = "yellow";
+  }
+  console.log("About to set lastDate and enter Backward Grey Fill Loop!");
+  var lastDate = firstDateOfMonth;
+  lastDate.setDate(0);
+  
+  //Backward Grey Fill Loop
+  var i;
+  for (i = firstDayOfWeek - 1; i > 0; i--)
+  {
+    document.getElementById("CellR1C" + i).innerHTML = lastDate.getDate();
+    document.getElementById("CellR1C" + i).style.color = "grey";
+    lastDate.setDate(lastDate.getDate() - 1);
+  }
+  
+  lastDate = new Date(currYear, currMonth, 1);
+  lastDate.setDate(0);
+  
+  
+  console.log("Before Forward First Loop, tempDate = " + tempDate);
+  //Forward First Week Fill Loop
+  var k;
+  for (k = firstDayOfWeek + 1; k < 8; k++)
+  {
+    console.log("First Week Will now fill CellR1C" + k + " with " + tempDate);
+    document.getElementById("CellR1C" + k).innerHTML = tempDate;
+    if (tempDate == currDate)
+    {
+      document.getElementById("CellR1C" + k).style.background = "yellow";
+    }
+    tempDate += 1;
+  }
+  
+  var r = 2;
+  var c = 1;
+  console.log("Before Forward Other Loop, r = " + r + " and c = " + c);
+  //Forward Other Weeks Fill Nested Loop
+  for (r = 2; r < 7 && tempDate <= lastDate.getDate(); r++)
+  {
+    console.log("Now Entering Forward Other Fill Loop");
+    for (c = 1; c < 8 && tempDate <= lastDate.getDate(); c++)
+    {
+      console.log("Other Weeks Will now fill CellR" + r + "C" + c + " with " + tempDate);
+      document.getElementById("CellR" + r + "C" + c).innerHTML = tempDate;
+      if (tempDate == currDate)
+      {
+        document.getElementById("CellR" + r + "C" + c).style.background = "yellow";
+      }
+      tempDate += 1;
+    }
+  }
+  
+  tempDate = 1;
+  r -= 1;
+  //Post-Month First Week Grey Fill Loop
+  for (c; c < 8; c++)
+  {
+    document.getElementById("CellR" + r + "C" + c).innerHTML = tempDate;
+    document.getElementById("CellR" + r + "C" + c).style.color = "grey";
+    tempDate += 1;
+  } 
+  
+  r += 1; 
+  
+  //Post-Month Second Week Grey Fill Loop (if there's only five rows)
+  if (r == 6)
+  {
+   for (c = 1; c < 8; c++)
+   {
+     document.getElementById("CellR" + r + "C" + c).innerHTML = tempDate;
+     document.getElementById("CellR" + r + "C" + c).style.color = "grey";
+     tempDate += 1;
+   }
+  }
+}
+</script>
+</body>
+</html>
