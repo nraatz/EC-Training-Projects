@@ -1,0 +1,280 @@
+@isTest
+public class TestingApexTriggerChallenge {
+    
+    @testSetup static void setup()
+    {
+        
+        Site__c newSite;
+        Project__c newProject;
+        SubProject__c newSubProject;
+        
+        newSite = new Site__c(Name='Site 1');
+        
+        insert newSite;
+        newProject = new Project__c(Name='Project 1 S1',Site__c=newSite.id);
+        
+        insert newProject;
+        newSubProject = new SubProject__c(Name='SubProject 1 S1P1',
+                                          project__c=newProject.id);
+        
+        insert newSubProject;
+        newSubProject = new SubProject__c(Name='SubProject 2 S1P1',
+                                          StartDate__c=Date.newInstance(1998, 1, 1),
+                                          project__c=newProject.id);
+        
+        insert newSubProject;
+        newSubProject = new SubProject__c(Name='SubProject 3 S1P1',
+                                          StartDate__c=Date.newInstance(2000, 1, 1),
+                                          project__c=newProject.id);
+        
+        insert newSubProject;
+        newProject = new Project__c(Name='Project 2 S1',Site__c=newSite.id);
+        
+        insert newProject;
+        newSubProject = new SubProject__c(Name='SubProject 1 S1P2',
+                                          project__c=newProject.id);
+        
+        insert newSubProject;
+        newSubProject = new SubProject__c(Name='SubProject 2 S1P2',
+                                          project__c=newProject.id);
+        
+        insert newSubProject;
+        newProject = new Project__c(Name='Project 3 S1',Site__c=newSite.id);
+        
+        insert newProject;
+        newSubProject = new SubProject__c(Name='SubProject 1 S1P3',
+                                          StartDate__c=Date.newInstance(1995, 1, 1),
+                                          project__c=newProject.id);
+        
+        insert newSubProject;
+        newSite = new Site__c(Name='Site 2');
+        
+        insert newSite;
+    }
+    
+    @isTest static void checkInitialInserts()
+    {
+        Site__c testSite = [SELECT id,StartDate__c,NumberOfProjects__c
+                            FROM Site__c
+                            WHERE Name='Site 1'
+                            LIMIT 1];
+        
+        System.debug('Will now try to assert that Site 1 isnt null');
+        System.assertNotEquals(null, testSite);
+        System.debug('Site 1 is not null, will now try to assert that SD is not null');
+        System.assertNotEquals(null, testSite.StartDate__c);
+        System.debug('SD is not null');
+        
+        Project__c testProject = [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 1 S1'
+                                  LIMIT 1];
+        System.debug('Checking if Project 1 SD is 98');
+        System.assertEquals(1998, testProject.StartDate__c.year());
+        
+        testProject = 			 [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 2 S1'
+                                  LIMIT 1];
+        System.debug('Checking if Project 2 SD is null');
+        System.assertEquals(null, testProject.StartDate__c);
+        
+        testProject = 			 [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 3 S1'
+                                  LIMIT 1];
+        System.debug('Checking if Project 3 SD is 95');
+        System.assertEquals(1995, testProject.StartDate__c.year());
+        System.debug('Projects are good, checking Site 1 for 98 Date and 3 NumProjects');
+        System.assertEquals(1998, testSite.StartDate__c.year());
+        System.debug('Date is good');
+        System.assertEquals(3, testSite.NumberOfProjects__c);
+        
+        
+        
+        testSite =		   [SELECT id,StartDate__c,NumberOfProjects__c
+                            FROM Site__c
+                            WHERE Name='Site 2'
+                            LIMIT 1];
+        
+        System.assertEquals(null, testSite.StartDate__c);
+        System.assertEquals(0, testSite.NumberOfProjects__c);
+        System.debug('checkInitial is now complete');
+    }
+    
+    @isTest static void delete98Sub()
+    {
+        System.debug('Right at the beginning of Delete98Sub');
+        SubProject__c deletedSub = [SELECT id
+                                    FROM SubProject__c
+                                    WHERE Name='SubProject 2 S1P1'
+                                    LIMIT 1];
+        System.debug('about to delete sub2 s1p1');
+        delete deletedSub;
+        System.debug('just deleted that sub');
+        
+        Project__c testProject = [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 1 S1'
+                                  LIMIT 1];
+        System.debug('checking to make sure Project 1 SD is now 2000');
+        System.assertEquals(2000, testProject.StartDate__c.year());
+        System.debug('Project 1 SD is indeed 2000');
+        testProject = 			 [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 2 S1'
+                                  LIMIT 1];
+        System.debug('checking to make sure Project 2 SD is still null');
+        System.assertEquals(null, testProject.StartDate__c);
+        System.debug('Project 2 SD is indeed null');
+        testProject = 			 [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 3 S1'
+                                  LIMIT 1];
+        System.debug('checking to make sure Project 3 SD is 95');
+        System.assertEquals(1995, testProject.StartDate__c.year());
+        System.debug('Project 3 SD is indeed 95');
+        Site__c testSite = [SELECT id,StartDate__c,NumberOfProjects__c
+                            FROM Site__c
+                            WHERE Name='Site 1'
+                            LIMIT 1];
+        System.debug('checking to make sure Site 1 SD is now 95');
+        System.assertEquals(1995, testSite.StartDate__c.year());
+        System.debug('Site 1 SD is indeed 95');
+        System.debug('Delete98 is now Complete');
+    }
+    
+    @isTest static void delete95Sub()
+    {
+        System.debug('Right At the Start of Delete95Sub');
+        SubProject__c deletedSub = [SELECT id,Name
+                                    FROM SubProject__c
+                                    WHERE Name='SubProject 1 S1P3'
+                                    LIMIT 1];
+        System.debug('About to delete Sub: ' + deletedSub.Name);
+        
+        Site__c testSite = [SELECT id,StartDate__c,NumberOfProjects__c,Name
+                            FROM Site__c
+                            WHERE Name='Site 1'
+                            LIMIT 1];
+        System.debug('Current Date for Site 1: ' + testSite.StartDate__c);
+        delete deletedSub;
+        System.debug('Just deleted Sub: ' + deletedSub.Name);
+        
+        testSite = [SELECT id,StartDate__c,NumberOfProjects__c,Name
+                    FROM Site__c
+                    WHERE Name='Site 1'
+                    LIMIT 1];
+        System.debug('Site 1 Name: ' + testSite.Name);
+        System.debug('Site 1 Date: ' + testSite.StartDate__c);
+        System.assertEquals(1998, testSite.StartDate__c.year());
+        
+        Project__c testProject = [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 1 S1'
+                                  LIMIT 1];
+        
+        System.assertEquals(1998, testProject.StartDate__c.year());
+        
+        testProject = 			 [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 3 S1'
+                                  LIMIT 1];
+        
+        System.assertEquals(null, testProject.StartDate__c);
+        System.debug('Exiting Delete95Sub');
+        
+    }
+    @isTest static void deleteDatedSubs()
+    {
+        System.debug('Entering DeleteDatedSubs');
+        SubProject__c deletedSub = [SELECT id,Name,StartDate__c
+                                    FROM SubProject__c
+                                    WHERE Name='SubProject 2 S1P1'
+                                    LIMIT 1];
+        System.debug('Sub about to be deleted is: ' + deletedSub);
+        delete deletedSub;
+        
+        deletedSub =               [SELECT id,Name,StartDate__c
+                                    FROM SubProject__c
+                                    WHERE Name='SubProject 3 S1P1'
+                                    LIMIT 1];
+        System.debug('Sub about to be deleted is: ' + deletedSub);
+        delete deletedSub;
+        
+        deletedSub =               [SELECT id,Name,StartDate__c
+                                    FROM SubProject__c
+                                    WHERE Name='SubProject 1 S1P3'
+                                    LIMIT 1];
+        System.debug('Sub about to be deleted is: ' + deletedSub);
+        delete deletedSub;
+        
+        Site__c testSite = [SELECT id,StartDate__c,NumberOfProjects__c
+                            FROM Site__c
+                            WHERE Name='Site 1'
+                            LIMIT 1];
+        
+        System.assertEquals(null, testSite.StartDate__c);
+        
+        Project__c testProject = [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 1 S1'
+                                  LIMIT 1];
+        
+        System.assertEquals(null, testProject.StartDate__c);
+        
+        testProject = 			 [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 2 S1'
+                                  LIMIT 1];
+        
+        System.assertEquals(null, testProject.StartDate__c);
+        
+        testProject = 			 [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 3 S1'
+                                  LIMIT 1];
+        
+        System.assertEquals(null, testProject.StartDate__c);
+    }
+    @isTest static void deleteDatelessProject()
+    {
+        Project__c testProject = [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 2 S1'
+                                  LIMIT 1];
+        
+        delete testProject;
+        
+        Site__c testSite = [SELECT id,StartDate__c,NumberOfProjects__c
+                            FROM Site__c
+                            WHERE Name='Site 1'
+                            LIMIT 1];
+        
+        System.assertEquals(2, testSite.NumberOfProjects__c);
+        
+    }
+    @isTest static void deleteEarliestProject()
+    {
+        Project__c testProject = [SELECT id,StartDate__c
+                                  FROM Project__c
+                                  WHERE Name='Project 3 S1'
+                                  LIMIT 1];
+        System.debug('ENTERING deleteEarliestProject');
+        delete testProject;
+        System.debug('95 Project has been Deleted');
+        
+        Site__c testSite = [SELECT id,StartDate__c,NumberOfProjects__c
+                            FROM Site__c
+                            WHERE Name='Site 1'
+                            LIMIT 1];
+        System.debug('Site 1 Date: ' + testSite.StartDate__c);
+        System.assertEquals(2, testSite.NumberOfProjects__c);
+        System.assertEquals(1998, testSite.StartDate__c.year());
+    }
+    
+    
+    
+    
+    
+}
