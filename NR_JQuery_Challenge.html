@@ -1,0 +1,187 @@
+﻿<html lang="en">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jQuery UI Draggable Sortable</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="/resources/demos/style.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+#sortableGreen { list-style-type: none; margin: 0; padding: 0; width: 300px; height: 100%; }
+#sortableRed { list-style-type: none; margin: 0; padding: 0; width: 300px; height: 100%; }
+#sortableGreen li { color: green; text-align: center; margin: 10px; padding: .4em; font-size: 1.4em; height: 18px; }
+#sortableRed li { color: red; text-align: center; margin: 10px; padding: .4em; font-size: 1.4em; height: 18px; }
+#sortable li span { position: absolute; margin-left: -1.3em; }
+div.LeftList {
+  float: left;
+  width: 296px;
+  height: 716px;
+  margin: 0px;
+  border-style: solid;
+  border-color: green;
+  border-width: 2px;
+}
+div.RightList {
+  float: left;
+  width: 296px;
+  height: 716px;
+  margin: 0px;
+  border-style: solid;
+  border-color: red;
+  border-width: 2px;
+}
+button {
+  margin: 5px;
+}
+
+/* The Modal (background) */
+
+
+.modal {
+  display: block; /* Hidden by default */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  align: center;
+  width: 80%; /* Full width */
+  height: 300px; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: 0px;
+  align: center;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover, .close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+th {
+  background-color: teal;
+}
+
+table {
+  border: 6px solid black;
+  border-collapse: collapse;
+  width: 600px;
+}
+
+td, th {
+  border: 2px solid black;
+  padding: 2px;
+  width: 200px;
+  text-align: center;
+}
+</style>
+<script>
+$( function() {
+  $("#inputModal").hide();
+  $(".modal-content").resizable({
+    minWidth:70,
+    minHeight:150
+  }).draggable();
+  $("#sortableGreen, #sortableRed").sortable({
+  	connectWith: ".connectedSortable",
+    receive: function(e, ui) { sortableIn = 1; },
+    over: function(e, ui) { sortableIn = 1; },
+    out: function(e, ui) { sortableIn = 0; },
+    beforeStop: function(e, ui) {
+       if (sortableIn == 0) { 
+          ui.item.remove(); 
+       } 
+    }
+  }).disableSelection();
+  $("#GreenButton").click(function() {
+    $("#sortableGreen").append('<li class="ui-state-default">' + $("#greenItemInput").val() + '</li>');
+  });
+  $("#RedButton").click(function() {
+    $("#sortableRed").append('<li class="ui-state-default">' + $("#redItemInput").val() + '</li>');
+  });
+  $("#openModalButton").click(function() {
+    $("#inputModal").show();
+    
+  });
+  $("#closeButton").click(function() {
+    $("#inputModal").hide();
+  });
+  $("#submitUserButton").click(function() {
+    $("#userTable").append('<tr><td>' + $("#nameInputField").val() + '</td><td>' + $("#emailInputField").val() + '</td><td>' + $("#passwordInputField").val() + '</td></tr>');
+    $("#inputModal").hide();
+  });
+  
+});
+</script>
+</head>
+
+<body>
+
+<div style="border:5px solid black; width: 600px; height: 720px;">
+  <div class="LeftList">
+  <ul id="sortableGreen" class="connectedSortable">
+    <li class="ui-state-default">Nolan</li>
+    <li class="ui-state-default">Zihark</li>
+    <li class="ui-state-default">Jill</li>
+    <li class="ui-state-default">Elincia</li>
+    <li class="ui-state-default">Haar</li>
+    <li class="ui-state-default">Nephenee</li>
+    <li class="ui-state-default">Soren</li>
+  </ul>
+  </div><div class="RightList">
+  <ul id="sortableRed" class="connectedSortable">
+    <li class="ui-state-default">Shinon</li>
+    <li class="ui-state-default">Boyd</li>
+    <li class="ui-state-default">Titania</li>
+    <li class="ui-state-default">Gatrie</li>
+    <li class="ui-state-default">Mia</li>
+    <li class="ui-state-default">Ulki</li>
+    <li class="ui-state-default">Volug</li>
+  </ul>
+  </div>
+</div>
+  <button id="GreenButton">Add Green Item With Text: </button><input type="text" id="greenItemInput"></input><br>
+  <button id="RedButton">Add Red Item With Text: </button><input type="text" id="redItemInput"></input><br><br><br><br>
+<table id="userTable">
+  <tr>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Password</th>
+  </tr>
+  <tr>
+    <td>Nolan Brolan</td>
+    <td>admin@dawnbrigade.net</td>
+    <td>hateyoujarod</td>
+  </tr>
+</table>
+<br><br>
+  <div id="inputModal" class="modal, ui-widget-content">
+    <div class="modal-content">
+      <span id="closeButton" class="close">&times;</span>
+      <p>Please Enter Your Name: <input id="nameInputField" type="text" minlength="3"></input></p>
+      <p>Please Enter Your Email: <input id="emailInputField" type="email" minlength="3"></input></p>
+      <p>Please Enter Your Password: <input id="passwordInputField" type="password" minlength="3"></input></p>
+      <button id="submitUserButton">Submit New User</button>
+    </div>
+</div>
+<button id="openModalButton">Add New User</button> 
+</body>
+</html>
