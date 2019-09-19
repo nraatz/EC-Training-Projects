@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<style> 
+#FourSquareBig {
+  display: block;
+  width: 200px;
+  height: 200px;
+  border-color: black;
+  border-style: solid;
+  border-width: 5px;
+}
+
+span.FourSquareFirst {
+  display: inline-block;
+  width: 86px;
+  height: 86px;
+  margin: 0px;
+  vertical-align:top;
+  background-color: orange;
+  border-style: solid;
+  border-color: orangered;
+  border-width: 7px;
+}
+
+span.FourSquareSecond {
+  display: inline-block;
+  width: 86px;
+  height: 86px;
+  
+  vertical-align:top;
+  background-color: mediumblue;
+  border-style: solid;
+  border-color: mediumvioletred;
+  border-width: 7px;
+}
+
+span.FourSquareThird {
+  display: inline-block;
+  width: 86px;
+  height: 86px;
+  margin: 0px;
+  vertical-align:top;
+  background-color: gold;
+  border-style: solid;
+  border-color: goldenrod;
+  border-width: 7px;
+}
+
+span.FourSquareFourth {
+  display: inline-block;
+  width: 86px;
+  height: 86px;
+  
+  vertical-align:top;
+  background-color: mediumspringgreen;
+  border-style: solid;
+  border-color: mediumseagreen;
+  border-width: 7px;
+}
+
+div#Sliding {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  position: relative;
+  animation-name: sliding-box;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;  
+  animation-timing-function: linear;
+}
+
+span.FourSquareFirst:hover {
+  background-color: orangered;
+  border-color: orange;
+}
+
+span.FourSquareSecond:hover {
+  background-color: mediumvioletred;
+  border-color: mediumblue;
+}
+
+span.FourSquareThird:hover {
+  background-color: goldenrod;
+  border-color: gold;
+}
+
+span.FourSquareFourth:hover {
+  background-color: mediumseagreen;
+  border-color: mediumspringgreen;
+}
+  
+
+/* Standard syntax */
+@keyframes sliding-box {
+  0%   {background-color:red; left:0px; top:0px;}
+  100% {background-color:blue; left:200px; top:0px;}
+}
+</style>
+</head>
+<body>
+
+<h1>Nathan Raatz HTML/CSS Challenge</h1>
+<p><b>Number One:</b> Create a bordered box with four squares inside, each with color and border. (hovering over a square shoudl invert that square's background and border color.</p>
+
+
+<div id="FourSquareBig">
+<span class="FourSquareFirst"></span><span class="FourSquareSecond"></span>
+<span class="FourSquareThird"></span><span class="FourSquareFourth"></span>
+</div>
+
+<p><b>Number Two:</b> Animate a box moving side to side while changing colors.</p>
+
+<div id="Sliding"></div>
+
+<p><b>Number Three:</b> Create a flower.</p>
+
+<svg width="500" height="500">
+  <rect width="20" height="150" style="fill:green" x="50" y="80" />
+  <polygon points="10,255 110,255 90,330 30,330"
+  style="fill:brown;" />
+  <rect width="120" height="25" style="fill:brown" x="0" y="230" />
+  <rect width="120" height="5" style="fill:grey" x="0" y="250" />
+  <polygon points="30,10 60,20 90,10 90,40 120,60 90,80 90,110 60,100 30,110 30,80 0,60 30,40"
+  style="fill:yellow;stroke:yellow;stroke-width:5;" />
+  <circle cx="60" cy="60" r="28" fill="saddlebrown" />
+  <ellipse cx="40" cy="160" rx="15" ry="6" fill="green" transform="rotate(-20 20 30)"/>
+  <ellipse cx="90" cy="160" rx="15" ry="6" fill="green" transform="rotate(20 -20 30)"/>
+</svg>
+
+</body>
+</html>

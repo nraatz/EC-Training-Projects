@@ -1,0 +1,214 @@
+trigger SubProjectTrigger on SubProject__c (after insert, after update, after delete) {
+    
+    if (Trigger.isInsert || Trigger.isUpdate) //uphill update StartDate if it's null up there
+    {
+        for (SubProject__c sub : [SELECT id,project__c,StartDate__c 
+                                  FROM SubProject__c 
+                                  WHERE id IN :Trigger.New])
+        {
+            if (sub.StartDate__c != null)
+            {
+                for (Project__c p : [SELECT id,site__c,StartDate__c 
+                                     FROM Project__c 
+                                     WHERE id = :sub.project__c])
+                {
+                    if (p.StartDate__c == null)
+                    {
+                        p.StartDate__c = sub.StartDate__c;
+                        update p;
+                    }
+                    for (Site__c s : [SELECT id,NumberOfProjects__c,StartDate__c 
+                                      FROM Site__c 
+                                      WHERE id = :p.site__c])
+                    {
+                        if (s.StartDate__c == null)
+                        {
+                            s.StartDate__c = sub.StartDate__c;
+                            update s;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (Trigger.isDelete) //Update StartDate of Project and Site
+    {
+        System.debug('TRIGGER DELETE JUST GOT FIRED IN APEX CLASS');
+        System.debug('Old: ' + Trigger.Old);
+        
+        // For each SubProject being deleted
+        for (SubProject__c sub : Trigger.Old)
+            //[SELECT id,project__c,StartDate__c 
+            //FROM SubProject__c 
+            //WHERE id IN :Trigger.Old]
+        {
+            System.debug('Entering for each of deleted subs');
+            System.debug('Deleted Sub Details: ' + sub);
+            // For the project associated with this
+            for (Project__c p : [SELECT id,site__c,StartDate__c 
+                                 FROM Project__c 
+                                 WHERE id = :sub.project__c])
+            {
+                System.debug('Entering for each of related project');
+                System.debug('Project Details: ' + p);
+                Date newStart = null;
+                Boolean hasSubs = false;
+                
+                System.debug('Should be Project 1: ' + p);
+                //List of this Project's SubProjects ordered from Oldest to Newest
+                List<SubProject__c> subList = [SELECT id,StartDate__c 
+                                               FROM SubProject__c
+                                               WHERE project__c = :p.id
+                                               ORDER BY StartDate__c ASC NULLS FIRST];
+                System.debug('size of number of subs should be 2: ' + subList.size());
+                if (subList.size() > 0)
+                {
+                    hasSubs = true; //We don't have to set Project's SD to null
+                    System.debug('hasSubs just got set to True');
+                    List<SubProject__c> subDatedList = [SELECT id,StartDate__c 
+                                                        FROM SubProject__c
+                                                        WHERE project__c = :p.id
+                                                        AND StartDate__c != null
+                                                        ORDER BY StartDate__c ASC];
+                    System.debug('How many dated subs in this project?:' 
+                                 + subDatedList.size());
+                    
+                    if (newStart == null)
+                    {
+                        if (subDatedList.size() == 0)
+                        {
+                            System.debug('newStart is null, project has no dated subs');
+                        } else {
+                            System.debug('newStart is null, setting project to '
+                                         + subDatedList.get(0).StartDate__c);
+                            newStart = subDatedList.get(0).StartDate__c;
+                        }
+                        
+                    } else if (newStart > subDatedList.get(0).StartDate__c)
+                    {
+                        // Update newStart if it's later than earliest Start here
+                        System.debug('newStart is filled and is later than earliest sub date');
+                        System.debug('Setting newStart to ' 
+                                     + subDatedList.get(0).StartDate__c.year());
+                        newStart = subDatedList.get(0).StartDate__c;
+                    }
+                }
+                
+                if (!hasSubs)
+                {
+                    System.debug('Project has no subs, auto setting date to null');
+                    p.StartDate__c = null;
+                    update p;
+                } else {
+                    System.debug('Project has subs');
+                    if (newStart != null)
+                    {
+                        System.debug('Project has subs, newStart is ' 
+                                     + newStart.year() + ' year');
+                        System.debug('newStart is not null, updating project');
+                        p.StartDate__c = newStart;
+                        update p;
+                    } else {
+                        System.debug('Project has no dated subs, so setting SD to null');
+                        p.StartDate__c = newStart;
+                        update p;
+                    }
+                } 
+                
+                // For each Site associated with that project
+                for (Site__c s : [SELECT id,NumberOfProjects__c,StartDate__c,Name 
+                                  FROM Site__c 
+                                  WHERE id = :p.site__c])
+                {
+                    System.debug('ENTERING FOR EACH FOR SITE ' + s.Name);
+                    System.debug('Current StartDate: ' + s.StartDate__c);
+                    // Update StartDate
+                    newStart = null; //
+                    hasSubs = false; //will indicate if i should put Null in Site
+                    // For each Project associated with this Site
+                    for (Project__c proj : [SELECT id,StartDate__c,Name 
+                                            FROM Project__c
+                                            WHERE site__c = :s.id])
+                    {
+                        //List of this Project's SubProjects ordered from Oldest to Newest
+                        System.debug('ENTERING FOR EACH FOR PROJECT ' + proj.Name);
+                        List<SubProject__c> subSiteList = [SELECT id,StartDate__c 
+                                                           FROM SubProject__c
+                                                           WHERE project__c = :proj.id
+                                                           ORDER BY StartDate__c ASC];
+                        if (subSiteList.size() > 0)
+                        {
+                            hasSubs = true; //We don't have to set Site's SD to null
+                            System.debug('hasSubs just got set to True');
+                            List<SubProject__c> subDatedSiteList = [SELECT id,StartDate__c 
+                                                                    FROM SubProject__c
+                                                                    WHERE project__c = :proj.id
+                                                                    AND StartDate__c != null
+                                                                    ORDER BY StartDate__c ASC];
+                            System.debug('How many dated subs in this project?: '
+                                         + subDatedSiteList.size());
+                            if (newStart == null)
+                            {
+                                if (subDatedSiteList.size() == 0)
+                                {
+                                    System.debug('newStart is null, project has no dated subs');
+                                } else {
+                                    System.debug('newStart is null, setting newStart to '
+                                                 + subDatedSiteList.get(0).StartDate__c);
+                                    newStart = subDatedSiteList.get(0).StartDate__c;
+                                    System.debug('newStart just got set to ' + newStart);
+                                }
+                                
+                            } else {
+                                if (subDatedSiteList.size() == 0)
+                                {
+                                    System.debug('newStart is not null, project has no dated subs');
+                                } else {
+                                    if (newStart > subDatedSiteList.get(0).StartDate__c)
+                                    {
+                                        // Update newStart if it's later than earliest Start here
+                                        System.debug('newStart is filled and is later than earliest sub date');
+                                        newStart = subDatedSiteList.get(0).StartDate__c;
+                                    }
+                                }
+                                
+                            }
+                        }
+                        System.debug('Current Site StartDate: ' + s.StartDate__c);
+                        if (newStart == null)
+                        {
+                            System.debug('ENDPROJECTLOOP, newStart is null, ' 
+                                         + proj.Name 
+                                         + ' has no dated subs');
+                        } else {
+                            System.debug('ENDPROJECTLOOPnewStart is not null, '
+                                         + proj.Name
+                                         + ' has some dated dated subs');
+                        }
+                    }
+                    System.debug('After Project loop, Current StartDate: ' + s.StartDate__c);
+                    if (!hasSubs)
+                    {
+                        System.debug('Site has no subs at all, setting SD to null');
+                        s.StartDate__c = null;
+                        update s;
+                    } else {
+                        System.debug('Site has some subs');
+                        if (newStart == null)
+                        {
+                            System.debug('Site has no dated subs, because newStart is null');
+                            s.StartDate__c = newStart;
+                            update s;
+                        } else
+                        {
+                            System.debug('Site has some dated subs, setting Site to earliest');
+                            s.StartDate__c = newStart;
+                            update s;
+                        }
+                    } 
+                }
+            }
+        }
+        System.debug('TRIGGER DELETE IS NOW DONE');
+    }
+}
